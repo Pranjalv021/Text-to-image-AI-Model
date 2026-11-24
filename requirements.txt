@@ -1,0 +1,8 @@
+torch
+diffusers>=0.30
+transformers>=4.40
+accelerate>=0.30
+safetensors
+datasets>=2.19
+gradio>=4.0
+pillow

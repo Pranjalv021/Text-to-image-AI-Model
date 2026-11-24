@@ -1,74 +1,59 @@
-# 🎨 Text-to-Image Generator
+# Text-to-Image AI Project (Hugging Face, 100% free)
 
-A deep learning / generative AI project that synthesizes high-resolution images from natural language text prompts.
+Generate images from text with free open models, test them on free Hugging Face
+datasets, and measure quality with CLIP. No API key, no login, no payment.
 
-## ✨ Showcase
+| Part | What is used |
+|---|---|
+| Models | `stabilityai/sd-turbo` (default), `segmind/tiny-sd` (lighter) |
+| Datasets | `Gustavosta/Stable-Diffusion-Prompts`, `lambdalabs/pokemon-blip-captions` |
+| Metric | CLIP score with `openai/clip-vit-base-patch32` |
+| Libraries | diffusers, transformers, datasets, torch, gradio |
 
-| Prompt | Generated Output |
-| :--- | :--- |
-| *"A futuristic cyberpunk city in the rain, neon lights, 8k resolution"* | ![Cyberpunk City](assets/sample_1.png) |
-| *"A cozy cabin in a snowy forest at sunset, studio ghibli style"* | ![Cozy Cabin](assets/sample_2.png) |
+## Setup on Windows + VS Code
+1. Install Python 3.10 - 3.12 from python.org (tick "Add python.exe to PATH").
+2. Unzip this folder; in VS Code use File > Open Folder.
+3. Open the terminal (Ctrl+`) and run:
 
-## 🚀 Features
-* **Prompt-to-Image Synthesis:** Converts descriptive text into detailed images.
-* **Customizable Parameters:** Control image resolution, guidance scale (CFG), inference steps, and random seeds.
-* **Web UI / CLI Support:** Run via an interactive web interface or directly from the command line.
-* **Model Flexibility:** Compatible with pre-trained checkpoints (e.g., Stable Diffusion, SDXL, or custom-trained weights).
+       python -m venv venv
+       venv\Scripts\activate.bat          (PowerShell: venv\Scripts\Activate.ps1)
+       pip install -r requirements.txt
+       python app.py
 
-## 🛠️ Tech Stack
-* **Language:** Python 3.10+
-* **Framework:** PyTorch / Hugging Face `diffusers` *(or API provider like OpenAI / Replicate)*
-* **Frontend:** Streamlit / Gradio *(optional)*
+   Or double-click `run.bat`.
+4. Your browser opens at http://127.0.0.1:7860
 
-## 📦 Installation
+Internet is needed on the first run only (model ~5 GB on CPU / ~2.5 GB on NVIDIA
+GPU, CLIP ~600 MB). Models are cached afterwards. Images go to `outputs/`.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com
-   cd text-to-image-generator
-   ```
+## What you can do in the app
+* **Generate** tab - choose a model, type a prompt (or click "Random prompt" to take
+  one from the dataset), get an image, time and CLIP score.
+* **Real vs AI (dataset)** tab - streams real image+caption pairs, generates an AI
+  image for each caption, shows both side by side with scores.
+* **About** tab - project summary.
 
-2. **Create a virtual environment and install dependencies:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+## Command line (for report results)
+    python generate.py --prompt "a red fox in the snow"
+    python evaluate.py --models stabilityai/sd-turbo segmind/tiny-sd --num 5
+    python evaluate.py --source dataset --num 5
+`evaluate.py` saves a CSV in `results/` and prints mean time and CLIP score per
+model - paste these numbers into the Results section of REPORT.md.
 
-3. **Set up environment variables** *(if using an external API)*:
-   ```bash
-   cp .env.example .env
-   # Add your API_KEY inside the .env file
-   ```
+## Faster with an NVIDIA GPU (optional)
+    pip uninstall -y torch
+    pip install torch --index-url https://download.pytorch.org/whl/cu121
 
-## 💻 Usage
+## Troubleshooting
+* torch / pygame-style build errors: use Python 3.11 or 3.12.
+* Slow on CPU (about 20-60 s per image for sd-turbo): lower image size to 384, or
+  keep steps at 1-2. tiny-sd needs ~25 steps, so it is slower on CPU.
+* Out of memory: image size 256-384.
+* Dataset tab fails: check internet; the first load streams data from Hugging Face.
+* C: drive full: set `HF_HOME=D:\hf_cache` before running to move the model cache.
 
-### Command Line (CLI)
-Generate an image directly from your terminal:
-```bash
-python generate.py --prompt "An astronaut riding a horse on Mars" --steps 30 --output output.png
-```
-
-### Web Interface
-Launch the interactive UI:
-```bash
-streamlit run app.py
-```
-
-## 📁 Project Structure
-```text
-├── assets/             # Sample generated images for README
-├── models/             # Model architecture or checkpoint loaders
-├── utils/              # Image processing and helper scripts
-├── app.py              # Web interface (Streamlit/Gradio)
-├── generate.py         # CLI inference script
-└── requirements.txt    # Project dependencies
-```
-
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com).
-
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
-# Text-to-image-AI-Model
-This is an text to image generator ai model used create images ,.
+## Files
+    app.py            web UI (3 tabs)          core.py         model loading + generation
+    generate.py       command-line generator   dataset_utils.py HF dataset loading
+    evaluate.py       batch evaluation -> CSV  evaluation.py   CLIP metrics
+    REPORT.md         report outline + viva questions
